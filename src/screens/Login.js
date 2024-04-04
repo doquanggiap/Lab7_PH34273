@@ -3,8 +3,10 @@ import React, { useState } from 'react'
 import TextInputCustom from '../components/TextInputCustom'
 import ButtonCustom from '../components/ButtonCustom'
 import { auth } from '../../config/firebase'
-import { sendPasswordResetEmail, signInWithEmailAndPassword } from 'firebase/auth'
+import { GoogleAuthProvider, sendPasswordResetEmail, signInWithCredential, signInWithEmailAndPassword } from 'firebase/auth'
 import ModalCustom from '../components/ModalCustom'
+import { GoogleSignin } from '@react-native-google-signin/google-signin'
+import { set } from 'firebase/database'
 
 const Login = ({ navigation }) => {
     const [email, setEmail] = useState('')
@@ -14,6 +16,10 @@ const Login = ({ navigation }) => {
     const [errMessPassword, setErrMessPassword] = useState('')
 
     const [isLoading, setisLoading] = useState(false)
+
+    GoogleSignin.configure({
+        webClientId: '739120329700-799at4amrg4uu6g0i3l7nsh4tgbls97e.apps.googleusercontent.com'
+    });
 
 
     const handleLogin = async () => {
@@ -59,6 +65,19 @@ const Login = ({ navigation }) => {
             setErrMessEmail('Email này chưa được đăng ký')
         }
         setisLoading(false)
+    }
+    const handleSignInWithGG = async () => {
+        setisLoading(true)
+
+        await GoogleSignin.hasPlayServices({ showPlayServicesUpdateDialog: true });
+
+        const { idToken } = await GoogleSignin.signIn().catch(err => console.log('ERR:' + err))
+
+        const googleCredential = GoogleAuthProvider.credential(idToken)
+
+        setisLoading(false)
+
+        return signInWithCredential(auth, googleCredential)
     }
     return (
         <View style={{
@@ -130,7 +149,7 @@ const Login = ({ navigation }) => {
                     }}>
                         Hoặc đăng nhập bằng
                     </Text>
-                    <TouchableOpacity>
+                    <TouchableOpacity onPress={handleSignInWithGG}>
                         <Image
                             source={{ uri: 'https://storage.googleapis.com/support-kms-prod/ZAl1gIwyUsvfwxoW9ns47iJFioHXODBbIkrK' }}
                             width={30}

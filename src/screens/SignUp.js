@@ -49,7 +49,13 @@ const SignUp = ({ navigation }) => {
 
         await createUserWithEmailAndPassword(auth, email, password)
             .then(() => Alert.alert('Thông báo', 'Đăng ký thành công'))
-            .catch((err) => Alert.alert('Thông báo thất bại', err.message))
+            .catch((err) => {
+                if (err.code === 'auth/email-already-in-use') {
+                    setErrMessEmail('Email đã được sử dụng')
+                    return
+                }
+                Alert.alert('Thông báo thất bại', err.message)
+            })
             .finally(() => setisLoading(false))
     }
 
